@@ -5,7 +5,8 @@ readme_from 'lib/Plack/Midelware/ErrorpageRedirectloopDefence.pm';
 readme_markdown_from 'lib/Plack/Midelware/ErrorpageRedirectloopDefence.pm';
 githubmeta;
 
-# requires '';
+requires 'parent';
+requires 'Plack::Request';
 
 tests 't/*.t';
 author_tests 'xt';
