@@ -19,11 +19,18 @@ my $html = <<'HTML';
 HTML
 
 builder {
-    enable 'ErrorpageRedirectloopDefence';
+    enable 'ErrorpageRedirectloopDefence',
+        code => qr/[45]\d\d/;
+#        code => '502';
+
     sub {
         my $req = Plack::Request->new(shift);
         my $body = sprintf $html, $req->uri, time(), $req->uri;
-        [ 502, [ 'Content-Type', 'text/html', 'Content-Length', length($body) ], [ $body ] ];
+        if ($req->path eq '/ok') {
+            return [ 200, [ 'Content-Type', 'text/html', 'Content-Length', length($body) ], [ $body ] ];
+        } else {
+            return [ 502, [ 'Content-Type', 'text/html', 'Content-Length', length($body) ], [ $body ] ];
+        }
     };
 };
 

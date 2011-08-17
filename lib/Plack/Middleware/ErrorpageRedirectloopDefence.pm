@@ -5,17 +5,24 @@ use parent qw(Plack::Middleware);
 our $VERSION = '0.09';
 
 use Plack::Request;
+use Plack::Util::Accessor qw/code/;
+
+my $res_notcontent = [ 204, [ 'Content-Type', 'text/html', 'Content-Length', '0' ], [ '' ] ];
 
 sub call {
     my $self = shift;
     my $env = shift;
     my $req = Plack::Request->new($env);
+    my $res = $self->app->($env);
+    return $res unless $req->uri eq ($req->header('referer') || '');
 
-    if ($req->uri eq $req->header('referer')) {
-        return [ 204, [ 'Content-Type', 'text/html', 'Content-Length', '0' ], [ '' ] ];
+    my $code = $self->code;
+    return $res unless $code;
+
+    if (((ref $code || '') eq 'Regexp' && $res->[0] =~ $code) || $res->[0].'' eq "$code") {
+        return $res_notcontent;
     }
-
-    $self->app->($env);
+    return $res;
 }
 
 
